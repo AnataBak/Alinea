@@ -1680,6 +1680,140 @@ export function LiveConsole() {
         aria-hidden="true"
         className="hidden-video"
       />
+      <div className={`assistant-screen assistant-screen--${status}`}>
+        <div className="assistant-screen__glow" aria-hidden="true" />
+        <button
+          type="button"
+          className="assistant-settings-button"
+          onClick={() => setIsSettingsOpen(true)}
+          aria-label="Открыть настройки"
+          title="Настройки"
+        >
+          <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+            <path d="M19.4 15a1.8 1.8 0 0 0 .36 2l.05.05a2.15 2.15 0 0 1-3.04 3.04l-.05-.05a1.8 1.8 0 0 0-2-.36 1.8 1.8 0 0 0-1.1 1.66V21.5a2.15 2.15 0 0 1-4.3 0v-.16a1.8 1.8 0 0 0-1.1-1.66 1.8 1.8 0 0 0-2 .36l-.05.05a2.15 2.15 0 0 1-3.04-3.04l.05-.05a1.8 1.8 0 0 0 .36-2 1.8 1.8 0 0 0-1.66-1.1H1.7a2.15 2.15 0 0 1 0-4.3h.16a1.8 1.8 0 0 0 1.66-1.1 1.8 1.8 0 0 0-.36-2l-.05-.05a2.15 2.15 0 0 1 3.04-3.04l.05.05a1.8 1.8 0 0 0 2 .36 1.8 1.8 0 0 0 1.1-1.66V1.7a2.15 2.15 0 0 1 4.3 0v.16a1.8 1.8 0 0 0 1.1 1.66 1.8 1.8 0 0 0 2-.36l.05-.05a2.15 2.15 0 0 1 3.04 3.04l-.05.05a1.8 1.8 0 0 0-.36 2 1.8 1.8 0 0 0 1.66 1.1h.16a2.15 2.15 0 0 1 0 4.3h-.16A1.8 1.8 0 0 0 19.4 15Z" />
+          </svg>
+        </button>
+
+        <div className={`voice-orb${isMicEnabled ? ' voice-orb--listening' : ''}`} aria-hidden="true">
+          {Array.from({ length: 34 }, (_, index) => (
+            <span
+              key={index}
+              className="voice-orb__ring"
+              style={{
+                ['--i' as string]: index,
+                ['--total' as string]: 34,
+              }}
+            />
+          ))}
+          <span className="voice-orb__core" />
+        </div>
+
+        <button
+          type="button"
+          className={`assistant-start-button${isSessionRunning ? ' assistant-start-button--active' : ''}`}
+          onClick={isSessionRunning ? stopConversation : () => void startSession()}
+          disabled={isBusy}
+          aria-label={isSessionRunning ? 'Остановить сессию' : 'Запустить сессию'}
+        >
+          <span className="assistant-start-button__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <path d="M12 19v3" />
+            </svg>
+          </span>
+          <span>{isSessionRunning ? 'СТОП' : 'СТАРТ'}</span>
+        </button>
+
+        <div className="assistant-action-row" role="toolbar" aria-label="Быстрые действия">
+          <button
+            type="button"
+            className={`assistant-icon-button${isCameraEnabled ? ' assistant-icon-button--on' : ''}`}
+            onClick={() => void handleToggleCamera()}
+            disabled={!isSessionActive}
+            aria-label={isCameraEnabled ? 'Выключить камеру' : 'Включить камеру'}
+            title="Камера"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 7h3l1.5-2h7L17 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className={`assistant-icon-button${isMicEnabled ? ' assistant-icon-button--on' : ''}`}
+            onClick={() => void handleToggleMicrophone()}
+            disabled={!isSessionActive}
+            aria-label={isMicEnabled ? 'Заглушить микрофон' : 'Включить микрофон'}
+            title="Микрофон"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 9v3a3 3 0 0 0 5.1 2.1" />
+              <path d="M15 9V6a3 3 0 0 0-5.1-2.1" />
+              <path d="M5 10v2a7 7 0 0 0 9.3 6.6" />
+              <path d="M19 10v2a7 7 0 0 1-.5 2.6" />
+              <path d="M12 19v3" />
+              <path d="m3 3 18 18" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className={`assistant-icon-button${memoryEnabled ? ' assistant-icon-button--on' : ''}`}
+            onClick={() => setMemoryEnabled((v) => !v)}
+            disabled={!modelSupportsSessionResumption(model)}
+            aria-label={memoryEnabled ? 'Не запоминать чат' : 'Запомнить чат'}
+            title="Память чата"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M6 3h10a2 2 0 0 1 2 2v16l-6-3-6 3V5a2 2 0 0 1 2-2Z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="assistant-icon-button"
+            onClick={clearSessionMemory}
+            disabled={!hasResumptionHandle}
+            aria-label="Очистить память чата"
+            title="Очистить память"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M6 6l1 15h10l1-15" />
+              <path d="M10 11v6" />
+              <path d="M14 11v6" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="assistant-composer">
+          <input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                handleSendText();
+              }
+            }}
+            placeholder="Напишите сообщение..."
+            disabled={!isSessionActive}
+          />
+          <button
+            type="button"
+            className="assistant-send-button"
+            onClick={handleSendText}
+            disabled={!isSessionActive || (!input.trim() && !pendingAttachment)}
+            aria-label="Отправить"
+            title="Отправить"
+          >
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M22 2 11 13" />
+              <path d="m22 2-7 20-4-9-9-4 20-7Z" />
+            </svg>
+          </button>
+        </div>
+      </div>
       <div className="console-panel status-panel">
         <div className="status-grid status-grid--single">
           <div className="status-card">
