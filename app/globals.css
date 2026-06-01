@@ -358,13 +358,15 @@ input {
   min-height: 4.2rem;
 }
 
-.assistant-icon-button:hover:not(:disabled),
-.assistant-send-button:hover:not(:disabled),
-.assistant-settings-button:hover {
-  transform: translateY(-1px);
-  border-color: rgba(72, 255, 150, 0.58);
-  color: #ffffff;
-  box-shadow: 0 0 1.3rem rgba(64, 255, 151, 0.18);
+@media (hover: hover) {
+  .assistant-icon-button:hover:not(:disabled),
+  .assistant-send-button:hover:not(:disabled),
+  .assistant-settings-button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(72, 255, 150, 0.58);
+    color: #ffffff;
+    box-shadow: 0 0 1.3rem rgba(64, 255, 151, 0.18);
+  }
 }
 
 .assistant-icon-button--on {
