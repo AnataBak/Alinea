@@ -248,16 +248,30 @@ input {
     radial-gradient(circle, transparent 56%, rgba(73, 255, 181, 0.48) 58%, rgba(58, 144, 255, 0.28) 66%, transparent 72%),
     conic-gradient(from var(--wave-spin), transparent 0 7%, rgba(35, 255, 140, 0.86), rgba(40, 128, 255, 0.84), rgba(220, 65, 255, 0.58), transparent 74% 100%);
   mask-image: radial-gradient(circle, transparent 51%, black 55%, black 72%, transparent 76%);
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.18);
   filter: blur(0.2px) drop-shadow(0 0 0.75rem rgba(66, 255, 180, 0.32));
   pointer-events: none;
+
+  /* Dynamic scale & opacity driven by JS frequency data via nth-child mapping */
+  transform: translate(-50%, -50%) scale(var(--wave-scale, 0.12));
+  opacity: var(--wave-opacity, 0);
+
+  /* Smooth interpolation between frequency frames */
+  transition:
+    transform 0.08s cubic-bezier(0.16, 0.78, 0.22, 1),
+    opacity 0.1s ease-out;
 }
 
-.voice-orb--speaking .voice-orb__wave {
-  animation: assistant-voice-ripple 1.85s cubic-bezier(0.16, 0.78, 0.22, 1) infinite;
-  animation-delay: var(--wave-delay);
-}
+/* Map each wave index to its CSS variable set on .voice-orb by the visualizer.
+   wave-0 through wave-7 correspond to the 8 <span> elements rendered before
+   .voice-orb__core in live-console.tsx — nth-child(1..8) reliably hits them. */
+.voice-orb__wave:nth-child(1) { --wave-scale: var(--wave-0-scale, 0.12); --wave-opacity: var(--wave-0-opacity, 0); }
+.voice-orb__wave:nth-child(2) { --wave-scale: var(--wave-1-scale, 0.12); --wave-opacity: var(--wave-1-opacity, 0); }
+.voice-orb__wave:nth-child(3) { --wave-scale: var(--wave-2-scale, 0.12); --wave-opacity: var(--wave-2-opacity, 0); }
+.voice-orb__wave:nth-child(4) { --wave-scale: var(--wave-3-scale, 0.12); --wave-opacity: var(--wave-3-opacity, 0); }
+.voice-orb__wave:nth-child(5) { --wave-scale: var(--wave-4-scale, 0.12); --wave-opacity: var(--wave-4-opacity, 0); }
+.voice-orb__wave:nth-child(6) { --wave-scale: var(--wave-5-scale, 0.12); --wave-opacity: var(--wave-5-opacity, 0); }
+.voice-orb__wave:nth-child(7) { --wave-scale: var(--wave-6-scale, 0.12); --wave-opacity: var(--wave-6-opacity, 0); }
+.voice-orb__wave:nth-child(8) { --wave-scale: var(--wave-7-scale, 0.12); --wave-opacity: var(--wave-7-opacity, 0); }
 
 .voice-orb__core {
   position: relative;
@@ -273,11 +287,15 @@ input {
 .voice-orb__core--active {
   border-color: #78fff2;
   background: radial-gradient(circle, rgba(114, 255, 245, 0.42), rgba(12, 34, 57, 0.65) 45%, rgba(2, 8, 10, 0.9));
-  box-shadow: 0 0 1.2rem rgba(89, 255, 235, 0.85), 0 0 5rem rgba(28, 92, 255, 0.6);
-}
-
-.voice-orb--speaking .voice-orb__core--active {
-  animation: assistant-core-speak 1.05s ease-in-out infinite;
+  /* Volume-reactive glow & pulse driven by --core-glow (set by VoiceOrbVisualizer) */
+  box-shadow:
+    0 0 calc(1.2rem + var(--core-glow, 0) * 2rem) rgba(89, 255, 235, calc(0.5 + var(--core-glow, 0) * 0.7)),
+    0 0 calc(5rem + var(--core-glow, 0) * 4rem) rgba(28, 92, 255, calc(0.3 + var(--core-glow, 0) * 0.7));
+  transform: scale(calc(1 + var(--core-glow, 0) * 0.18));
+  /* Gentle breath animation even when idle — volume pulse adds on top */
+  animation: assistant-core-breathe 2.4s ease-in-out infinite;
+  transition:
+    box-shadow 0.08s ease-out;
 }
 
 .assistant-start-button {
@@ -401,31 +419,12 @@ input {
   background: radial-gradient(circle at 50% 50%, rgba(50, 255, 139, 0.16), rgba(4, 11, 8, 0.78));
 }
 
-@keyframes assistant-voice-ripple {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.16) rotate(0deg);
-  }
-  12% {
-    opacity: 0.95;
-  }
-  56% {
-    opacity: 0.42;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(6.6) rotate(42deg);
-  }
-}
-
-@keyframes assistant-core-speak {
+@keyframes assistant-core-breathe {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 1.2rem rgba(89, 255, 235, 0.8), 0 0 5rem rgba(28, 92, 255, 0.55);
   }
-  42% {
-    transform: scale(1.18);
-    box-shadow: 0 0 1.9rem rgba(113, 255, 235, 0.95), 0 0 6.5rem rgba(40, 125, 255, 0.78);
+  50% {
+    transform: scale(1.04);
   }
 }
 

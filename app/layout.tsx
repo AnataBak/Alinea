@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk, Source_Sans_3 } from 'next/font/google';
 import { ServiceWorkerRegister } from '@/components/sw-register';
+import { VoiceOrbVisualizer } from '@/components/voice-orb-visualizer';
 import './globals.css';
 
 const headingFont = Space_Grotesk({
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${headingFont.variable} ${bodyFont.variable}`}>
         {children}
         <ServiceWorkerRegister />
+        <VoiceOrbVisualizer />
       </body>
     </html>
   );
