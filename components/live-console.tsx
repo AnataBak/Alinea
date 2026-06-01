@@ -255,6 +255,7 @@ export function LiveConsole() {
   const [sessionExpiry, setSessionExpiry] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>('server-token');
   const [isBusy, setIsBusy] = useState(false);
+  const [isModelSpeaking, setIsModelSpeaking] = useState(false);
   const [temperature, setTemperature] = useState<number>(0.6);
   const [voice, setVoice] = useState<string>('Puck');
   const [language, setLanguage] = useState<string>('');
@@ -310,6 +311,7 @@ export function LiveConsole() {
   });
   const messageCounterRef = useRef(0);
   const eventCounterRef = useRef(0);
+  const modelSpeakingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageListRef = useRef<HTMLDivElement | null>(null);
   const isStuckToBottomRef = useRef(true);
   const googleCalendarPopupRef = useRef<Window | null>(null);
@@ -420,6 +422,11 @@ export function LiveConsole() {
   }, [appendEvent]);
 
   const teardownSession = useCallback(() => {
+    if (modelSpeakingTimerRef.current) {
+      clearTimeout(modelSpeakingTimerRef.current);
+      modelSpeakingTimerRef.current = null;
+    }
+    setIsModelSpeaking(false);
     stopMicrophone();
     stopCamera();
     stopScreen();
@@ -438,6 +445,14 @@ export function LiveConsole() {
           appendEvent('Сессия Gemini Live готова.');
           return;
         case 'audio':
+          setIsModelSpeaking(true);
+          if (modelSpeakingTimerRef.current) {
+            clearTimeout(modelSpeakingTimerRef.current);
+          }
+          modelSpeakingTimerRef.current = setTimeout(() => {
+            setIsModelSpeaking(false);
+            modelSpeakingTimerRef.current = null;
+          }, 900);
           // Audio from the model signals the user's turn is over: close their
           // pending chat bubble so their next utterance renders as a new
           // message instead of being appended to the previous one.
@@ -1695,18 +1710,19 @@ export function LiveConsole() {
           </svg>
         </button>
 
-        <div className={`voice-orb${isMicEnabled ? ' voice-orb--listening' : ''}`} aria-hidden="true">
-          {Array.from({ length: 34 }, (_, index) => (
+        <div className={`voice-orb${isModelSpeaking ? ' voice-orb--speaking' : ''}`} aria-hidden="true">
+          {Array.from({ length: 8 }, (_, index) => (
             <span
               key={index}
-              className="voice-orb__ring"
+              className="voice-orb__wave"
               style={{
                 ['--i' as string]: index,
-                ['--total' as string]: 34,
+                ['--wave-delay' as string]: `${index * -0.18}s`,
+                ['--wave-spin' as string]: `${index * 28}deg`,
               }}
             />
           ))}
-          <span className="voice-orb__core" />
+          <span className={`voice-orb__core${isSessionRunning ? ' voice-orb__core--active' : ''}`} />
         </div>
 
         <button
@@ -1717,11 +1733,18 @@ export function LiveConsole() {
           aria-label={isSessionRunning ? 'Остановить сессию' : 'Запустить сессию'}
         >
           <span className="assistant-start-button__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <path d="M12 19v3" />
-            </svg>
+            {isSessionRunning ? (
+              <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 5v14" />
+                <path d="M16 5v14" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <path d="M12 19v3" />
+              </svg>
+            )}
           </span>
           <span>{isSessionRunning ? 'СТОП' : 'СТАРТ'}</span>
         </button>
