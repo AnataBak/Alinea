@@ -1983,3 +1983,139 @@ input {
     width: 100%;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE PERFORMANCE OVERRIDES
+   Removing the most expensive GPU paint operations on small
+   screens: filter: blur/drop-shadow, conic-gradients with many
+   stops, animated box-shadows, and complex mask-images.
+   Visual style is preserved by keeping the base colors,
+   borders, and layout intact.
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* ── Simplify assistant-screen background ── */
+  .assistant-screen {
+    /* Reduce from 3 gradient layers to 1 solid-ish gradient —
+       still looks dark+glowy, but far cheaper to paint. */
+    background:
+      radial-gradient(circle at 50% 38%, rgba(31, 64, 167, 0.18), transparent 14rem),
+      linear-gradient(180deg, rgba(7, 18, 15, 0.96), rgba(4, 8, 10, 0.98));
+    /* Thinner, simpler box-shadow — no blur, just the border glow */
+    box-shadow:
+      0 0 0.5rem rgba(0, 255, 150, 0.2),
+      0 1.2rem 3rem rgba(0, 0, 0, 0.72);
+  }
+
+  .assistant-screen--stopped,
+  .assistant-screen--error {
+    box-shadow:
+      0 0 0.6rem rgba(255, 54, 54, 0.4),
+      0 1.2rem 3rem rgba(0, 0, 0, 0.72);
+  }
+
+  /* ── Remove expensive dot-pattern pseudo-element ── */
+  .assistant-screen::before {
+    display: none;
+  }
+
+  /* ── Remove the border-pulse animation (animates box-shadow = paint trashing) ── */
+  .assistant-screen--active,
+  .assistant-screen--connecting {
+    animation: none;
+  }
+
+  /* ── Simplify the screen glow — no blur ── */
+  .assistant-screen__glow {
+    filter: none;
+    opacity: 0.35;
+  }
+
+  /* ── Simplify orb ambient glow (::before pseudo) ── */
+  .voice-orb::before {
+    /* Replace conic-gradient + blur with a simple radial gradient */
+    background:
+      radial-gradient(circle, rgba(99, 255, 226, 0.14), transparent 62%);
+    filter: none;
+    opacity: 0.3;
+    transform: scale(0.96);
+  }
+
+  .voice-orb--speaking::before {
+    animation: assistant-core-aura 1.4s ease-in-out infinite;
+  }
+
+  /* ── Simplify wave rings — no blur/drop-shadow, simpler gradient ── */
+  .voice-orb__wave {
+    /* Preserve the ring appearance with a simpler 2-stop mask.
+       Still creates a hollow circle, but without the expensive
+       4-stop mask + double gradient of the desktop version. */
+    background:
+      conic-gradient(from var(--wave-spin), transparent 0 10%, rgba(35, 255, 140, 0.7), rgba(40, 128, 255, 0.6), transparent 72% 100%);
+    mask-image: radial-gradient(circle, transparent 45%, black 46%);
+    filter: none;
+    width: 2.6rem;
+    border: none;
+  }
+
+  /* ── Simplify orb core glow — fewer/reduced box-shadows ── */
+  .voice-orb__core--active {
+    box-shadow:
+      0 0 calc(0.8rem + var(--core-glow, 0) * 1.2rem) rgba(89, 255, 235, calc(0.4 + var(--core-glow, 0) * 0.5));
+    transition: box-shadow 0.08s ease-out;
+  }
+
+  /* ── Remove hover effects that add box-shadow ── */
+  .assistant-icon-button:hover:not(:disabled),
+  .assistant-send-button:hover:not(:disabled),
+  .assistant-settings-button:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* ── Remove backdrop-filter on panels (expensive composite) ── */
+  .hero-panel,
+  .console-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .sticky-controls {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .settings-drawer-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* ── Simplify start-button icon shadow ── */
+  .assistant-start-button__icon {
+    box-shadow:
+      inset 0 0 0.8rem rgba(74, 255, 146, 0.15),
+      0 0 0.8rem rgba(54, 255, 140, 0.25);
+  }
+
+  /* ── Only animate transform (GPU-composited) on the orb aura ── */
+  /* Use a separate animation name to avoid Safari @keyframes scope issues */
+  @keyframes assistant-core-aura-mobile {
+    0%, 100% {
+      transform: scale(0.92);
+      opacity: 0.3;
+    }
+    45% {
+      transform: scale(1.12);
+      opacity: 0.55;
+    }
+  }
+
+  .voice-orb--speaking::before {
+    animation-name: assistant-core-aura-mobile;
+  }
+
+  /* ── Simplify bottom bar glow ── */
+  .assistant-screen::after {
+    box-shadow: 0 0 0.4rem rgba(55, 255, 139, 0.5);
+  }
+}
