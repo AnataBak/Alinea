@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk, Source_Sans_3 } from 'next/font/google';
+import Script from 'next/script';
 import { ServiceWorkerRegister } from '@/components/sw-register';
 import { VoiceOrbVisualizer } from '@/components/voice-orb-visualizer';
 import './globals.css';
@@ -47,6 +48,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <ServiceWorkerRegister />
         <VoiceOrbVisualizer />
+        {/* Telegram Mini App SDK — инжектит window.Telegram.WebApp */}
+        <Script
+          src="https://telegram.org/js/telegram-web-app.js"
+          strategy="beforeInteractive"
+        />
       </body>
     </html>
   );
