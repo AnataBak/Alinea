@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 type TelegramUserInfo = {
   id: number;
   first_name: string;
+  last_name?: string;
   username?: string;
   photo_url?: string;
 };
@@ -48,11 +50,33 @@ export function TelegramDiagnostic() {
       const user: TelegramUserInfo = {
         id: rawUser.id,
         first_name: rawUser.first_name,
+        last_name: rawUser.last_name,
         username: rawUser.username,
         photo_url: rawUser.photo_url,
       };
 
       setState({ status: 'found', user, initDataUnsafe });
+
+      // Sync user to Supabase
+      supabase
+        .from('users')
+        .upsert(
+          {
+            telegram_id: user.id,
+            username: user.username ?? null,
+            first_name: user.first_name,
+            last_name: user.last_name ?? null,
+            photo_url: user.photo_url ?? null,
+          },
+          { onConflict: 'telegram_id' }
+        )
+        .then(({ error }) => {
+          if (error) {
+            console.error('[Supabase] User sync error:', error);
+          } else {
+            console.log('[Supabase] User synced to Supabase');
+          }
+        });
     }, 100);
 
     return () => clearTimeout(timer);
