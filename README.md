@@ -85,4 +85,4 @@ Minimal `Next.js` starter for talking to `gemini-3.1-flash-live-preview` with:
   `googleSearch` tool.
 - Audio input is converted to `audio/pcm;rate=16000`.
 - Camera frames are sent as `image/jpeg` once per second.
-- Gemini audio output is played back as 24kHz PCM.
+- Gemini audio output is played back as 24kHz PCM..
