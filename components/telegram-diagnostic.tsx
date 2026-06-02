@@ -22,6 +22,8 @@ export function TelegramDiagnostic() {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
+    console.log('[TelegramDiagnostic] Component mounted, checking Telegram SDK...');
+
     // Даём SDK время на загрузку и инициализацию
     const timer = setTimeout(() => {
       console.log('[TelegramDiagnostic] window.Telegram:', window.Telegram);
