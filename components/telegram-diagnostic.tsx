@@ -69,6 +69,7 @@ export function TelegramDiagnostic() {
             first_name: user.first_name,
             last_name: user.last_name ?? null,
             photo_url: user.photo_url ?? null,
+            last_seen_at: new Date().toISOString(),
           },
           { onConflict: 'telegram_id' }
         )
@@ -76,7 +77,7 @@ export function TelegramDiagnostic() {
           if (error) {
             console.error('[Supabase] User sync error:', error);
           } else {
-            console.log('[Supabase] User synced to Supabase');
+            console.log('[Supabase] Updated last_seen_at');
           }
         });
     }, 100);
